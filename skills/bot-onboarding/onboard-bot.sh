@@ -212,6 +212,22 @@ curl -s "$SWITCHBOARD_URL/tasks/$bot_name" | jq
 - [ ] If context is bloated, restart gateway: \`clawdbot gateway restart\`
 - [ ] Store important state in Switchboard or Notion before restart
 
+### 6. Session Size Monitor
+\`\`\`bash
+# Check session file size and auto-clear if > 500KB
+session_file=\$(find ~/.config/clawdbot/ -name "session*" -type f 2>/dev/null | head -1)
+if [[ -n "\$session_file" ]]; then
+    size=\$(stat -f%z "\$session_file" 2>/dev/null || stat -c%s "\$session_file" 2>/dev/null || echo 0)
+    if [[ \$size -gt 512000 ]]; then
+        echo "Session file \${size} bytes > 500KB - clearing and restarting"
+        clawdbot gateway restart
+    fi
+fi
+\`\`\`
+- [ ] Session file size monitored automatically
+- [ ] Auto-restart when sessions exceed 500KB  
+- [ ] Prevents context bloat and memory issues
+
 ## External Storage Rules (MANDATORY)
 - **NEVER store context/state locally** - use Switchboard shared memories
 - **Use Notion** for project tracking and documentation
