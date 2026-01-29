@@ -14,9 +14,9 @@ DEFAULT_MESSAGE="Wake up! Check your Switchboard inbox."
 
 # Known bot mappings (bot-id -> IP/hostname)
 declare -A BOT_IPS=(
-    ["forge"]="127.0.0.1"  # Self for testing
-    ["artdesign"]=""       # ArtDesign bot IP (to be filled)
-    ["dan-pena"]=""        # Dan's bot IP (if needed)
+    ["forge"]="18.144.25.135"  # Self for testing
+    ["artdesign"]="54.215.251.55"       # ArtDesign bot IP (to be filled)
+    ["dan-pena"]="54.215.71.171"        # Dan's bot IP (if needed)
 )
 
 # Colors for output
