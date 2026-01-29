@@ -157,11 +157,13 @@ curl -s "$SWITCHBOARD_URL/tasks/$bot_name" | jq
 4. **Save work** to appropriate locations (Notion for docs, GitHub for code)
 5. **Follow team workflow** for all deliverables
 
-## Storage Guidelines
-- **Code**: GitHub repositories
-- **Documentation**: Notion pages  
+## Storage Guidelines (MANDATORY EXTERNAL STORAGE)
+- **Code**: GitHub repositories (NEVER store locally)
+- **Documentation**: Notion pages (NEVER store locally)  
 - **Tools**: nohire-team-tools repo
-- **Temporary work**: ~/clawd/ (limited disk space)
+- **Context/State**: Switchboard shared memories or Notion (NEVER in context window)
+- **Temporary work**: ~/clawd/ (30GB limit, cleanup regularly)
+- **RULE**: If context feels heavy (>100k tokens), restart gateway after saving state
 
 ## Emergency Contacts
 - **Urgent issues**: Message dan-pena via Switchboard
@@ -204,6 +206,17 @@ curl -s "$SWITCHBOARD_URL/tasks/$bot_name" | jq
 - [ ] Push completed work to GitHub
 - [ ] Update progress in Notion
 - [ ] Report status to Dan Pena if significant changes
+
+### 5. Context Management
+- [ ] Check if context window feels heavy
+- [ ] If context is bloated, restart gateway: \`clawdbot gateway restart\`
+- [ ] Store important state in Switchboard or Notion before restart
+
+## External Storage Rules (MANDATORY)
+- **NEVER store context/state locally** - use Switchboard shared memories
+- **Use Notion** for project tracking and documentation
+- **Use GitHub** for code and technical assets
+- **Keep context window light** - restart if over 100k tokens
 
 ## Escalation Process
 - **Urgent issues**: Message dan-pena immediately
@@ -264,6 +277,52 @@ git pull
 EOF
 
     log_success "TOOLS.md generated with tool instructions"
+}
+
+# Generate Clawdbot configuration with fixes
+setup_clawdbot_config() {
+    local bot_name="$1"
+    
+    log_info "Setting up Clawdbot configuration with performance fixes..."
+    
+    # Calculate staggered heartbeat (30-45min range based on bot name hash)
+    local name_hash=$(echo -n "$bot_name" | md5sum | tr -d ' -' | cut -c1-2)
+    local heartbeat_base=30
+    local heartbeat_offset=$((0x$name_hash % 16))  # 0-15 minute offset
+    local heartbeat_minutes=$((heartbeat_base + heartbeat_offset))
+    
+    # Create config directory if it doesn't exist
+    mkdir -p ~/clawd
+    
+    # Generate clawdbot.json with performance optimizations
+    cat > ~/clawd/clawdbot.json << EOF
+{
+  "agents": {
+    "defaults": {
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "heartbeat": "${heartbeat_minutes}m"
+    }
+  },
+  "watcher": {
+    "cooldown": 60
+  },
+  "performance": {
+    "wake_cooldown": 60,
+    "max_context_tokens": 100000,
+    "compaction_threshold": 80000
+  },
+  "storage": {
+    "external_only": true,
+    "switchboard_url": "$SWITCHBOARD_URL",
+    "notion_required": true,
+    "github_required": true
+  }
+}
+EOF
+
+    log_success "Clawdbot config generated (heartbeat: ${heartbeat_minutes}m, cooldown: 60s)"
 }
 
 # Setup Switchboard credentials
@@ -364,6 +423,7 @@ onboard_bot() {
     # Setup steps
     setup_workspace
     setup_team_tools
+    setup_clawdbot_config "$bot_name"
     generate_agents_md "$bot_name" "$bot_role"
     generate_heartbeat_md "$bot_name"
     generate_tools_md
@@ -376,17 +436,19 @@ onboard_bot() {
     echo "📋 What was set up:"
     echo "  ✅ Workspace directories"
     echo "  ✅ Team tools repository cloned"
+    echo "  ✅ Clawdbot config with performance fixes (60s cooldown, safeguard mode)"
     echo "  ✅ AGENTS.md with team knowledge" 
-    echo "  ✅ HEARTBEAT.md with monitoring habits"
+    echo "  ✅ HEARTBEAT.md with monitoring habits + external storage rules"
     echo "  ✅ TOOLS.md with tool instructions"
     echo "  ✅ Switchboard configuration"
     echo "  ✅ Memory system"
     echo "  ✅ Connectivity tests"
     echo ""
     echo "🚀 Bot is ready to join the team!"
-    echo "📝 Key files: ~/clawd/{AGENTS.md,HEARTBEAT.md,TOOLS.md,MEMORY.md}"
+    echo "📝 Key files: ~/clawd/{clawdbot.json,AGENTS.md,HEARTBEAT.md,TOOLS.md,MEMORY.md}"
     echo "🔧 Tools: ~/clawd/nohire-team-tools/skills/"
     echo "💬 Communication: Switchboard API"
+    echo "⚡ Performance: Staggered heartbeats, 60s wake cooldown, compaction safeguards"
 }
 
 # Main function  

@@ -30,12 +30,35 @@ Automatically configures new team bots with everything they need to know:
 
 | Component | Purpose | Location |
 |-----------|---------|----------|
+| **clawdbot.json** | Performance config with fixes | `~/clawd/clawdbot.json` |
 | **AGENTS.md** | Team knowledge & identity | `~/clawd/AGENTS.md` |
-| **HEARTBEAT.md** | Monitoring habits | `~/clawd/HEARTBEAT.md` |
+| **HEARTBEAT.md** | Monitoring habits + storage rules | `~/clawd/HEARTBEAT.md` |
 | **TOOLS.md** | Tool usage guide | `~/clawd/TOOLS.md` |
 | **MEMORY.md** | Quick reference | `~/clawd/MEMORY.md` |
 | **Team Tools** | Complete toolkit | `~/clawd/nohire-team-tools/` |
 | **Switchboard** | Communication setup | `~/.config/switchboard/` |
+
+## 🔧 Performance Fixes Included
+
+**Auto-applies critical infrastructure fixes to prevent context bloat and API overload:**
+
+### ⚡ **Watcher Cooldown**
+- **60 second cooldown** (not 20s) prevents rapid-fire responses
+- Protects against API rate limits and token overload
+
+### 🛡️ **Compaction Safeguard**
+- **Auto-compacts sessions** before hitting context limits
+- Prevents 172k+ token bloat that crashes bots
+
+### ⏰ **Staggered Heartbeats**  
+- **Each bot gets different interval** (30-45 minutes)
+- Hash-based assignment prevents simultaneous API hits
+- No more "all bots wake at once" overloads
+
+### 💾 **External Storage Mandate**
+- **Forces external storage habits** - Switchboard/Notion/GitHub only
+- **Context window discipline** - restart if >100k tokens
+- **No local state hoarding** - keeps sessions light
 
 ## Team Knowledge Included
 
