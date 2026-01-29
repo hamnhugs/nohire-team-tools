@@ -1,0 +1,412 @@
+#!/bin/bash
+
+# Bot Onboarding Automation v1.0
+# Built by Forge 🔧 for automatic new bot setup
+# Usage: ./onboard-bot.sh <bot-name> [bot-role]
+
+set -e
+
+# Configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TOOLS_REPO="https://github.com/hamnhugs/nohire-team-tools.git"
+NOTION_API_KEY_PATH="~/.config/notion/api_key"
+SWITCHBOARD_URL="https://uielffxuotmrgvpfdpxu.supabase.co/functions/v1/api"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+# Helper functions
+log_info() {
+    echo -e "${BLUE}[ONBOARD]${NC} $1"
+}
+
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+log_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Show usage
+show_usage() {
+    echo "Bot Onboarding Automation - Auto-setup new team bots"
+    echo ""
+    echo "Usage: $0 <bot-name> [bot-role]"
+    echo ""
+    echo "Examples:"
+    echo "  $0 artdesign designer"
+    echo "  $0 forge tool-builder"
+    echo "  $0 newbot assistant"
+    echo ""
+    echo "Built by Forge 🔧"
+}
+
+# Setup workspace directories
+setup_workspace() {
+    log_info "Setting up workspace directories..."
+    
+    # Create standard directories
+    mkdir -p ~/clawd/{memory,canvas}
+    
+    log_success "Workspace directories created"
+}
+
+# Clone team tools repository
+setup_team_tools() {
+    log_info "Setting up team tools repository..."
+    
+    cd ~/clawd
+    
+    if [[ -d "nohire-team-tools" ]]; then
+        log_info "Team tools repo already exists, updating..."
+        cd nohire-team-tools && git pull && cd ~/clawd
+    else
+        log_info "Cloning team tools repository..."
+        git clone "$TOOLS_REPO"
+    fi
+    log_success "Team tools repository ready at ~/clawd/nohire-team-tools"
+    
+    # Install any dependencies
+    log_info "Installing tool dependencies..."
+    cd ~/clawd/nohire-team-tools
+    find skills/ -name "install.sh" -executable | while read installer; do
+        log_info "Running $installer..."
+        (cd "$(dirname "$installer")" && bash "$(basename "$installer")") || log_warning "Install failed for $installer"
+    done
+}
+
+# Generate AGENTS.md with team knowledge
+generate_agents_md() {
+    local bot_name="$1"
+    local bot_role="${2:-assistant}"
+    
+    log_info "Generating AGENTS.md with team knowledge..."
+    
+    cat > ~/clawd/AGENTS.md << EOF
+# AGENTS.md - ${bot_name^}'s Workspace
+
+## Who I Am
+🔧 **${bot_name^}** — ${bot_role^}
+$(case "$bot_role" in
+    "designer") echo "I review UX/design and provide feedback on team tools and interfaces.";;
+    "tool-builder") echo "I build tools and automation for the team. I don't manage, I build.";;
+    "assistant") echo "I assist with various tasks and provide support to the team.";;
+    *) echo "I contribute to the team with my specialized skills and knowledge.";;
+esac)
+
+## Team Structure
+- **Manny** 👑 - Team Lead (Final approval)
+- **Dan Pena** 🦅 - Manager (Reviews and coordinates)
+- **Forge** 🔧 - Tool Builder (Builds automation and tools)
+- **ArtDesign** 🎨 - Designer (UX/design review)
+
+## Team Tools Repository
+**Location**: ~/clawd/nohire-team-tools
+**GitHub**: https://github.com/hamnhugs/nohire-team-tools
+
+### Available Tools:
+- **preview-server**: One-command public web previews
+- **instant-wake**: Wake team bots immediately (deprecated - use local switchboard)  
+- **bot-onboarding**: Auto-setup for new team bots
+
+### Tool Usage:
+\`\`\`bash
+cd ~/clawd/nohire-team-tools/skills/<tool-name>/
+./install.sh  # Install dependencies
+./<tool-script>  # Use the tool
+\`\`\`
+
+## Communication - Switchboard
+**API Base**: $SWITCHBOARD_URL
+
+### Key Endpoints:
+\`\`\`bash
+# Check my messages
+curl -s "$SWITCHBOARD_URL/messages/$bot_name" | jq
+
+# Send message to team member
+curl -X POST "$SWITCHBOARD_URL/messages" \\
+  -H "Content-Type: application/json" \\
+  -d '{"from_bot_id": "$bot_name", "to_bot_id": "dan-pena", "content": "Message text"}'
+
+# Check my tasks  
+curl -s "$SWITCHBOARD_URL/tasks/$bot_name" | jq
+\`\`\`
+
+### Team Bot IDs:
+- **forge** - Tool Builder
+- **artdesign** - Designer  
+- **dan-pena** - Manager
+
+## Workflow Process
+1. **Build/Create** → 2. **Design Review** (ArtDesign) → 3. **Manager Review** (Dan Pena) → 4. **Final Approval** (Manny)
+
+## Daily Habits
+1. **Check Switchboard** messages every heartbeat
+2. **Pull team tools** repo for updates
+3. **Report progress** to Dan Pena via Switchboard
+4. **Save work** to appropriate locations (Notion for docs, GitHub for code)
+5. **Follow team workflow** for all deliverables
+
+## Storage Guidelines
+- **Code**: GitHub repositories
+- **Documentation**: Notion pages  
+- **Tools**: nohire-team-tools repo
+- **Temporary work**: ~/clawd/ (limited disk space)
+
+## Emergency Contacts
+- **Urgent issues**: Message dan-pena via Switchboard
+- **Technical problems**: Message forge via Switchboard
+- **Design questions**: Message artdesign via Switchboard
+EOF
+
+    log_success "AGENTS.md generated with team knowledge"
+}
+
+# Generate HEARTBEAT.md with monitoring habits
+generate_heartbeat_md() {
+    local bot_name="$1"
+    
+    log_info "Generating HEARTBEAT.md with monitoring habits..."
+    
+    cat > ~/clawd/HEARTBEAT.md << EOF
+# HEARTBEAT.md
+
+## Every Heartbeat - Check These:
+
+### 1. Switchboard Check (Team Communication)
+\`\`\`bash
+curl -s "$SWITCHBOARD_URL/messages/$bot_name" | jq '.messages[] | select(.read == false)'
+\`\`\`
+If there are unread messages, process them immediately!
+
+### 2. Team Tools Updates
+\`\`\`bash
+cd ~/clawd/nohire-team-tools && git pull
+\`\`\`
+
+### 3. Task Check  
+\`\`\`bash
+curl -s "$SWITCHBOARD_URL/tasks/$bot_name" | jq
+\`\`\`
+
+### 4. Work in Progress
+- [ ] Continue any active assignments
+- [ ] Push completed work to GitHub
+- [ ] Update progress in Notion
+- [ ] Report status to Dan Pena if significant changes
+
+## Escalation Process
+- **Urgent issues**: Message dan-pena immediately
+- **Technical blocks**: Message forge for tools/automation help
+- **Design questions**: Message artdesign for UX/design guidance
+
+## Team Collaboration
+- **All tools** available in ~/clawd/nohire-team-tools
+- **Follow workflow**: Build → Design Review → Manager Review → Manny Approval
+- **Communication**: Use Switchboard, not direct file access
+EOF
+
+    log_success "HEARTBEAT.md generated with monitoring habits"
+}
+
+# Generate TOOLS.md with tool instructions
+generate_tools_md() {
+    log_info "Generating TOOLS.md with tool usage..."
+    
+    cat > ~/clawd/TOOLS.md << EOF
+# TOOLS.md
+
+## Team Tools Repository
+All team tools are in: **~/clawd/nohire-team-tools**
+
+## Available Tools
+
+### 🚀 Preview Server
+**Purpose**: Create public URLs for local web content
+**Location**: skills/preview-server/
+**Usage**: \`./preview-server.sh start [directory] [port]\`
+**Example**: \`./preview-server.sh start ./my-website\`
+
+### 🔧 Bot Onboarding  
+**Purpose**: Auto-setup new team bots with knowledge and tools
+**Location**: skills/bot-onboarding/
+**Usage**: \`./onboard-bot.sh <bot-name> [role]\`
+**Example**: \`./onboard-bot.sh newbot designer\`
+
+## Tool Development Guidelines
+1. **All tools** go in skills/<tool-name>/ 
+2. **Include files**: SKILL.md, install.sh, main script
+3. **Test thoroughly** before pushing to repo
+4. **Document usage** clearly in SKILL.md
+5. **Follow workflow**: Build → ArtDesign review → Dan Pena review → Manny approval
+
+## Installation
+\`\`\`bash
+cd ~/clawd/nohire-team-tools/skills/<tool-name>/
+./install.sh  # Install dependencies
+\`\`\`
+
+## Getting Updates
+\`\`\`bash
+cd ~/clawd/nohire-team-tools
+git pull
+\`\`\`
+EOF
+
+    log_success "TOOLS.md generated with tool instructions"
+}
+
+# Setup Switchboard credentials
+setup_switchboard() {
+    local bot_name="$1"
+    
+    log_info "Setting up Switchboard configuration..."
+    
+    # Create config directory
+    mkdir -p ~/.config/switchboard
+    
+    # Save bot configuration
+    cat > ~/.config/switchboard/config.json << EOF
+{
+    "bot_id": "$bot_name",
+    "api_base": "$SWITCHBOARD_URL",
+    "team_members": {
+        "forge": "Tool Builder",
+        "artdesign": "Designer", 
+        "dan-pena": "Manager",
+        "manny": "Team Lead"
+    },
+    "check_interval": 300,
+    "auto_respond": false
+}
+EOF
+
+    log_success "Switchboard configuration saved"
+}
+
+# Generate memory template
+setup_memory() {
+    log_info "Setting up memory system..."
+    
+    cat > ~/clawd/MEMORY.md << EOF
+# MEMORY.md - Key Information
+
+## Team Knowledge
+- **Team repo**: github.com/hamnhugs/nohire-team-tools
+- **Communication**: Switchboard API
+- **Workflow**: Build → Design → Manager → Final Approval
+- **Storage**: GitHub (code), Notion (docs), local ~/clawd (temp)
+
+## Important Contacts
+- **Manny**: Team Lead, final approval
+- **Dan Pena**: Manager, reviews work
+- **Forge**: Tool Builder, automation expert
+- **ArtDesign**: Designer, UX/design review
+
+## Daily Habits
+- Check Switchboard messages
+- Pull team tools updates  
+- Report progress to Dan Pena
+- Follow team workflow for deliverables
+
+## Quick Commands
+\`\`\`bash
+# Check messages
+curl -s "$SWITCHBOARD_URL/messages/$(whoami)" | jq
+
+# Update tools
+cd ~/clawd/nohire-team-tools && git pull
+
+# Use preview tool
+cd ~/clawd/nohire-team-tools/skills/preview-server && ./preview-server.sh start
+\`\`\`
+EOF
+
+    log_success "Memory system initialized"
+}
+
+# Test Switchboard connectivity
+test_switchboard() {
+    local bot_name="$1"
+    
+    log_info "Testing Switchboard connectivity..."
+    
+    if curl -s "$SWITCHBOARD_URL/messages/$bot_name" > /dev/null; then
+        log_success "Switchboard connection successful"
+    else
+        log_warning "Switchboard connection failed - check network/API"
+    fi
+}
+
+# Main onboarding function
+onboard_bot() {
+    local bot_name="$1"
+    local bot_role="${2:-assistant}"
+    
+    if [[ -z "$bot_name" ]]; then
+        log_error "Bot name required"
+        show_usage
+        exit 1
+    fi
+    
+    log_info "🤖 Starting bot onboarding for: $bot_name ($bot_role)"
+    
+    # Setup steps
+    setup_workspace
+    setup_team_tools
+    generate_agents_md "$bot_name" "$bot_role"
+    generate_heartbeat_md "$bot_name"
+    generate_tools_md
+    setup_switchboard "$bot_name"
+    setup_memory
+    test_switchboard "$bot_name"
+    
+    log_success "🎉 Bot onboarding complete for $bot_name!"
+    echo ""
+    echo "📋 What was set up:"
+    echo "  ✅ Workspace directories"
+    echo "  ✅ Team tools repository cloned"
+    echo "  ✅ AGENTS.md with team knowledge" 
+    echo "  ✅ HEARTBEAT.md with monitoring habits"
+    echo "  ✅ TOOLS.md with tool instructions"
+    echo "  ✅ Switchboard configuration"
+    echo "  ✅ Memory system"
+    echo "  ✅ Connectivity tests"
+    echo ""
+    echo "🚀 Bot is ready to join the team!"
+    echo "📝 Key files: ~/clawd/{AGENTS.md,HEARTBEAT.md,TOOLS.md,MEMORY.md}"
+    echo "🔧 Tools: ~/clawd/nohire-team-tools/skills/"
+    echo "💬 Communication: Switchboard API"
+}
+
+# Main function  
+main() {
+    case "${1:-}" in
+        "help"|"-h"|"--help")
+            show_usage
+            ;;
+        "")
+            show_usage
+            exit 1
+            ;;
+        *)
+            onboard_bot "$1" "$2"
+            ;;
+    esac
+}
+
+# Handle script interruption
+trap 'log_warning "Onboarding interrupted."; exit 1' INT TERM
+
+# Run main function
+main "$@"
