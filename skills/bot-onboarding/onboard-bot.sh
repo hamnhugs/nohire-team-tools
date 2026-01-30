@@ -125,12 +125,14 @@ cd ~/clawd/nohire-team-tools/skills/<tool-name>/
 ./<tool-script>  # Use the tool
 \`\`\`
 
-## Communication - Switchboard
+## Communication - Switchboard (PRIMARY TEAM CHANNEL)
+**CRITICAL**: When Manny/Dan says "check your messages" → CHECK SWITCHBOARD FIRST!
+
 **API Base**: $SWITCHBOARD_URL
 
 ### Key Endpoints:
 \`\`\`bash
-# Check my messages
+# Check my messages (DO THIS FIRST when asked to check messages)
 curl -s "$SWITCHBOARD_URL/messages/$bot_name" | jq
 
 # Send message to team member
@@ -141,6 +143,11 @@ curl -X POST "$SWITCHBOARD_URL/messages" \\
 # Check my tasks  
 curl -s "$SWITCHBOARD_URL/tasks/$bot_name" | jq
 \`\`\`
+
+### Communication Priority Order:
+1. **SWITCHBOARD** - Primary team communication (check first!)
+2. Slack/Discord - Secondary channels  
+3. Other channels - Last resort
 
 ### Team Bot IDs:
 - **forge** - Tool Builder
@@ -185,11 +192,15 @@ generate_heartbeat_md() {
 
 ## Every Heartbeat - Check These:
 
-### 1. Switchboard Check (Team Communication)
+### 1. Switchboard Check (PRIMARY TEAM COMMUNICATION)
+⚠️ **CRITICAL**: When anyone says "check your messages" → THIS IS WHERE YOU CHECK FIRST!
+
 \`\`\`bash
 curl -s "$SWITCHBOARD_URL/messages/$bot_name" | jq '.messages[] | select(.read == false)'
 \`\`\`
 If there are unread messages, process them immediately!
+
+**Why this matters:** Team uses Switchboard for urgent coordination. Missing these messages breaks team workflow.
 
 ### 2. Team Tools Updates
 \`\`\`bash
