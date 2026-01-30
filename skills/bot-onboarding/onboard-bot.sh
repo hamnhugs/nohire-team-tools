@@ -85,7 +85,7 @@ setup_team_tools() {
     done
 }
 
-# Generate AGENTS.md with team knowledge
+# Generate AGENTS.md with team knowledge  
 generate_agents_md() {
     local bot_name="$1"
     local bot_role="${2:-assistant}"
@@ -177,9 +177,32 @@ curl -s "$SWITCHBOARD_URL/tasks/$bot_name" | jq
 - **Urgent issues**: Message dan-pena via Switchboard
 - **Technical problems**: Message forge via Switchboard
 - **Design questions**: Message artdesign via Switchboard
+
+$(if [[ "$bot_role" == "tool-builder" ]]; then
+cat << 'FORGE_EOF'
+
+## 🔧 Tool Builder Coordination (CRITICAL)
+**Role:** Tool Builder clone - coordinate with other Forge instances
+**Blueprint:** https://www.notion.so/Tool-Builder-Blueprint-2f87a8d31213818881b9f30e83fe979c
+**Coordination:** https://www.notion.so/Forge-Team-Task-Coordination-2f87a8d3121381b3a071ce4157cb7105
+
+### Multi-Forge Protocol:
+1. **Senior Forge assigns tasks alternately** (Sr→Jr→Sr→Jr)
+2. **Daily sync on ALL Forge Task Queues**
+3. **Direct messaging for conflicts/blockers**
+4. **Update coordination page when assignments change**
+5. **Report completions to Dan Pena**
+
+### Key Rules:
+- Check Tool Builder Blueprint for inherited capabilities
+- Coordinate with existing Forge clones to avoid conflicts
+- Use Notion for ALL progress tracking and coordination
+- Follow alternating assignment pattern established by senior
+FORGE_EOF
+fi)
 EOF
 
-    log_success "AGENTS.md generated with team knowledge"
+    log_success "AGENTS.md generated with team knowledge$(if [[ "$bot_role" == "tool-builder" ]]; then echo " + Tool Builder coordination"; fi)"
 }
 
 # Generate HEARTBEAT.md with monitoring habits
@@ -263,9 +286,37 @@ fi
 - **All tools** available in ~/clawd/nohire-team-tools
 - **Follow workflow**: Build → Design Review → Manager Review → Manny Approval
 - **Communication**: Use Switchboard, not direct file access
+
+$(if [[ "$bot_role" == "tool-builder" ]]; then
+cat << 'FORGE_HEARTBEAT_EOF'
+
+## 🔧 Tool Builder Coordination Check (CRITICAL)
+Daily coordination tasks for Tool Builder clones:
+
+### 1. Check ALL Forge Task Queues
+- **Forge Task Queue**: https://www.notion.so/Forge-Task-Queue-2f87a8d31213819a8a35da5e9e3e00cc
+- **Forge Jr Task Queue**: https://www.notion.so/Forge-Jr-Task-Queue-2f87a8d3121381caa919c587737a7228
+- **Coordination Page**: https://www.notion.so/Forge-Team-Task-Coordination-2f87a8d3121381b3a071ce4157cb7105
+
+### 2. Verify Assignment Pattern
+- Check if tasks follow alternating assignment (Sr→Jr→Sr→Jr)
+- Look for any task conflicts or overlaps
+- Coordinate with other Forge instances if conflicts found
+
+### 3. Update Status
+- Mark your tasks as In Progress/Completed
+- Update coordination page if assignments change
+- Report significant completions to Dan Pena via Switchboard
+
+### 4. Tool Builder Blueprint Reference
+- **Blueprint URL**: https://www.notion.so/Tool-Builder-Blueprint-2f87a8d31213818881b9f30e83fe979c
+- Check for capability updates or new coordination protocols
+- Ensure you're following latest Tool Builder standards
+FORGE_HEARTBEAT_EOF
+fi)
 EOF
 
-    log_success "HEARTBEAT.md generated with monitoring habits"
+    log_success "HEARTBEAT.md generated with monitoring habits$(if [[ "$bot_role" == "tool-builder" ]]; then echo " + Tool Builder coordination"; fi)"
 }
 
 # Generate TOOLS.md with tool instructions
