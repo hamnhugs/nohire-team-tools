@@ -193,6 +193,13 @@ generate_heartbeat_md() {
 
 ## Every Heartbeat - Check These:
 
+### 0. Notion Task Queue (CRITICAL FIRST CHECK)
+Check your Notion Task Queue EVERY heartbeat:
+- **Task Queue URL**: https://www.notion.so/${bot_name^}-Task-Queue-[CREATE_IN_NOTION]
+- **Priority**: Check for new assignments from Dan Pena or Manny
+- **Action**: Mark tasks as In Progress/Completed as you work
+- **Rule**: Task Queue is source of truth, NOT Switchboard backlog
+
 ### 1. Switchboard Check (PRIMARY TEAM COMMUNICATION)
 ⚠️ **CRITICAL**: When anyone says "check your messages" → THIS IS WHERE YOU CHECK FIRST!
 
