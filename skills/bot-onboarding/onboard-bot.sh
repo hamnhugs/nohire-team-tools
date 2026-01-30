@@ -197,11 +197,12 @@ generate_heartbeat_md() {
 ⚠️ **CRITICAL**: When anyone says "check your messages" → THIS IS WHERE YOU CHECK FIRST!
 
 \`\`\`bash
-curl -s "$SWITCHBOARD_URL/messages/$bot_name" | jq '.messages[] | select(.read == false)'
+# ONLY check for NEW messages (avoid historical backlog)
+curl -s "$SWITCHBOARD_URL/messages/$bot_name" | jq '.messages[] | select(.read == false and .created_at > "$(date -u -d "1 hour ago" +%Y-%m-%dT%H:%M:%SZ)")'
 \`\`\`
-If there are unread messages, process them immediately!
+⚠️ **DO NOT process historical message backlogs** - Only handle recent unread messages!
 
-**Why this matters:** Team uses Switchboard for urgent coordination. Missing these messages breaks team workflow.
+**Why this matters:** Team uses Switchboard for urgent coordination. Missing these messages breaks team workflow. Historical backlogs can overwhelm new bots.
 
 ### 2. Team Tools Updates
 \`\`\`bash
