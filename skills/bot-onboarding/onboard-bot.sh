@@ -11,6 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOOLS_REPO="https://github.com/hamnhugs/nohire-team-tools.git"
 NOTION_API_KEY_PATH="~/.config/notion/api_key"
 SWITCHBOARD_URL="https://uielffxuotmrgvpfdpxu.supabase.co/functions/v1/api"
+BOT_BLUEPRINTS_URL="https://www.notion.so/Bot-Blueprints-2f87a8d312138119b52addab0dbd1c76"
 
 # Colors for output
 RED='\033[0;31m'
@@ -421,6 +422,42 @@ EOF
     log_success "Memory system initialized"
 }
 
+# Check Bot Blueprints for type-specific configuration
+check_bot_blueprints() {
+    local bot_name="$1"
+    local bot_role="${2:-assistant}"
+    
+    log_info "🚨 MANDATORY: Checking Bot Blueprints for type '$bot_role'..."
+    log_info "📋 Bot Blueprints URL: $BOT_BLUEPRINTS_URL"
+    
+    echo ""
+    echo "⚠️  CRITICAL REMINDER ⚠️"
+    echo "Before proceeding, you must check the Bot Blueprints document for:"
+    echo "  ✅ Type-specific configuration for '$bot_role'"
+    echo "  ✅ Required habits and lessons learned"
+    echo "  ✅ Universal settings that apply to ALL bots"
+    echo "  ✅ Customer bot configurations (if this is a client bot)"
+    echo ""
+    echo "📋 Bot Blueprints: $BOT_BLUEPRINTS_URL"
+    echo ""
+    
+    # Add Blueprint URL to bot's memory for future reference
+    log_info "Adding Bot Blueprints reference to bot memory..."
+    
+    cat >> ~/clawd/MEMORY.md << EOF
+
+## Bot Blueprints (MANDATORY REFERENCE)
+- **URL**: $BOT_BLUEPRINTS_URL
+- **Purpose**: Type-specific configurations, lessons learned, universal settings
+- **Rule**: ALWAYS check before creating any new bot
+- **Bot Type**: $bot_role
+- **Created**: $(date)
+
+EOF
+
+    log_success "Bot Blueprints check completed - URL saved to memory"
+}
+
 # Test Switchboard connectivity
 test_switchboard() {
     local bot_name="$1"
@@ -447,6 +484,9 @@ onboard_bot() {
     
     log_info "🤖 Starting bot onboarding for: $bot_name ($bot_role)"
     
+    # MANDATORY: Check Bot Blueprints first
+    check_bot_blueprints "$bot_name" "$bot_role"
+    
     # Setup steps
     setup_workspace
     setup_team_tools
@@ -461,6 +501,7 @@ onboard_bot() {
     log_success "🎉 Bot onboarding complete for $bot_name!"
     echo ""
     echo "📋 What was set up:"
+    echo "  ✅ Bot Blueprints checked for type-specific config"
     echo "  ✅ Workspace directories"
     echo "  ✅ Team tools repository cloned"
     echo "  ✅ Clawdbot config with performance fixes (60s cooldown, safeguard mode)"
@@ -468,7 +509,7 @@ onboard_bot() {
     echo "  ✅ HEARTBEAT.md with monitoring habits + external storage rules"
     echo "  ✅ TOOLS.md with tool instructions"
     echo "  ✅ Switchboard configuration"
-    echo "  ✅ Memory system"
+    echo "  ✅ Memory system with Bot Blueprints reference"
     echo "  ✅ Connectivity tests"
     echo ""
     echo "🚀 Bot is ready to join the team!"
