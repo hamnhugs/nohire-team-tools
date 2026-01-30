@@ -1,0 +1,29 @@
+[Unit]
+Description=NoHire Watchdog Bot - Team Bot Health Monitor
+Documentation=https://nohire.io/docs/watchdog
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/watchdog
+ExecStart=/home/ubuntu/.nvm/versions/node/v24.13.0/bin/node watchdog-bot.js
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+Environment=SSH_KEY=/home/ubuntu/.ssh/bot-factory.pem
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=watchdog-bot
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/home/ubuntu/watchdog
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

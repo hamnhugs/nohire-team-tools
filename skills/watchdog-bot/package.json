@@ -1,0 +1,19 @@
+{
+  "name": "watchdog-bot",
+  "version": "1.0.0",
+  "description": "NoHire team bot health monitor and auto-recovery system",
+  "main": "watchdog-bot.js",
+  "scripts": {
+    "start": "node watchdog-bot.js",
+    "test": "node test-watchdog.js",
+    "install-service": "sudo cp watchdog.service /etc/systemd/system/ && sudo systemctl enable watchdog && sudo systemctl start watchdog",
+    "status": "sudo systemctl status watchdog"
+  },
+  "keywords": ["bot", "monitoring", "health", "watchdog", "nohire"],
+  "author": "Forge <forge@nohire.io>",
+  "license": "MIT",
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
