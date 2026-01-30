@@ -333,6 +333,9 @@ setup_clawdbot_config() {
       "heartbeat": "${heartbeat_minutes}m"
     }
   },
+  "commands": {
+    "restart": true
+  },
   "watcher": {
     "cooldown": 60
   },
