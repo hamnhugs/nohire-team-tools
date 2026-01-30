@@ -9,7 +9,7 @@ set -e
 # Configuration
 CLUSTER=${1:-cluster1}
 INSTANCE_TYPE="t3.small"
-AMI_ID="ami-0c02fb55956c7d316"  # Ubuntu 24.04 LTS
+AMI_ID="ami-053635f5016bf8bd6"  # Ubuntu 24.04 LTS (Nov 2025)
 KEY_NAME="bot-factory"
 SECURITY_GROUP_ID="sg-0b07d76bbdea5ffdf"
 SUBNET_ID="subnet-0123456789abcdef0"  # Update with actual subnet
