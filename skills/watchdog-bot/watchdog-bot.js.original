@@ -32,9 +32,8 @@ const CONFIG = {
     SSH_KEY: process.env.SSH_KEY || '~/.ssh/bot-factory.pem',
     SSH_USER: 'ubuntu',
     
-    // Discord settings (loaded from environment)
-    DISCORD_CHANNEL: process.env.DISCORD_CHANNEL || "1466825803512942813",
-    DISCORD_TOKEN: process.env.DISCORD_TOKEN,
+    // Discord settings (loaded from config)
+    DISCORD_CHANNEL: '1466825803512942813',
     
     // Mesh network settings  
     MESH_PORT: 47823
@@ -160,7 +159,7 @@ async function clearBotSessions(botId, botIp) {
 async function alertDiscord(message) {
     try {
         // Use clawdbot message tool
-        const command = `/home/ubuntu/.nvm/versions/node/v24.13.0/bin/node ~/watchdog-bot/send-discord.js "${message}"`;
+        const command = `clawdbot message send --channel discord --target ${CONFIG.DISCORD_CHANNEL} --message "${message}"`;
         exec(command, (error, stdout, stderr) => {
             if (error) {
                 console.error('Discord alert failed:', error);
@@ -258,63 +257,3 @@ module.exports = {
     restartBot,
     clearBotSessions
 };
-/**
- * Check for context overflow via clawdbot status
- */
-async function checkContextUsage(botId, botIp) {
-    return new Promise((resolve) => {
-        const command = `ssh -i ${CONFIG.SSH_KEY} -o ConnectTimeout=10 -o StrictHostKeyChecking=no ${CONFIG.SSH_USER}@${botIp} "clawdbot status | grep -i context || echo \"no context info\""`;
-        
-        exec(command, { timeout: 15000 }, (error, stdout, stderr) => {
-            if (error) {
-                resolve({ 
-                    botId, 
-                    contextStatus: "unknown",
-                    error: error.message 
-                });
-                return;
-            }
-            
-            // Look for context overflow indicators
-            const output = stdout.toLowerCase();
-            const hasContextError = output.includes("context") && (
-                output.includes("overflow") || 
-                output.includes("limit") || 
-                output.includes("full") ||
-                output.includes("error")
-            );
-            
-            resolve({ 
-                botId,
-                contextStatus: hasContextError ? "overflow" : "ok",
-                rawOutput: stdout.trim()
-            });
-        });
-    });
-}
-
-// Add context check to monitoring loop
-setInterval(async () => {
-    console.log("🔍 Starting context overflow check...");
-    
-    for (const [botId, botIp] of Object.entries(CONFIG.BOTS)) {
-        try {
-            const contextResult = await checkContextUsage(botId, botIp);
-            console.log(`📊 Context check ${botId}:`, contextResult.contextStatus);
-            
-            if (contextResult.contextStatus === "overflow") {
-                console.log(`🚨 CONTEXT OVERFLOW DETECTED for ${botId}! Clearing sessions...`);
-                await clearBotSessions(botIp);
-                await sendDiscordAlert(`🔄 **CONTEXT OVERFLOW**: Cleared sessions for ${botId} (${botIp})`);
-            }
-        } catch (error) {
-            console.error(`Context check failed for ${botId}:`, error.message);
-        }
-        
-        // Small delay between checks
-        await new Promise(resolve => setTimeout(resolve, 2000));
-    }
-    
-    console.log("✅ Context overflow check complete");
-}, 2 * 60 * 1000); // Every 2 minutes for context checks
-

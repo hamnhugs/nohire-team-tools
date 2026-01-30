@@ -6,23 +6,26 @@ After=network.target
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/home/ubuntu/watchdog
+WorkingDirectory=/home/ubuntu/watchdog-bot
 ExecStart=/home/ubuntu/.nvm/versions/node/v24.13.0/bin/node watchdog-bot.js
 Restart=always
 RestartSec=10
 Environment=NODE_ENV=production
 Environment=SSH_KEY=/home/ubuntu/.ssh/bot-factory.pem
+Environment=DISCORD_TOKEN=DISCORD_TOKEN_PLACEHOLDER
+Environment=DISCORD_CHANNEL=DISCORD_CHANNEL_PLACEHOLDER
 
 # Logging
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=watchdog-bot
 
-# Security
+# Security (relaxed for SSH access)
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
-ReadWritePaths=/home/ubuntu/watchdog
+ReadWritePaths=/home/ubuntu/watchdog-bot
+ReadWritePaths=/tmp
 ProtectHome=read-only
 
 [Install]
