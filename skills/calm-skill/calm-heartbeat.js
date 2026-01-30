@@ -269,18 +269,18 @@ function processCalmMessage(message) {
 /**
  * CLI interface
  */
-function main() {
+async function main() {
     const command = process.argv[2];
     
     switch (command) {
         case 'activate':
             const task = process.argv[3] || 'Manual priority mode activation';
-            activatePriorityMode(task, 'manual');
+            await activatePriorityMode(task, 'manual');
             break;
             
         case 'deactivate':
         case 'cooldown':
-            deactivatePriorityMode('manual');
+            await deactivatePriorityMode('manual');
             break;
             
         case 'status':
