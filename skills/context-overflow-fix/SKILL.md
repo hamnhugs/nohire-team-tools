@@ -1,46 +1,95 @@
 # CONTEXT OVERFLOW FIX SKILL
 
-**Built by FORGE for NoHire Team**
+**Built by FORGE for NoHire Team | Enhanced by FORGE JR**
 
 ## Purpose
-Emergency reset tool for context overflow issues affecting multiple team bots simultaneously.
+Complete context overflow management system with detection, prevention, and emergency reset capabilities.
 
-## What It Does
-- **Emergency Reset**: Clears sessions for all team bots instantly
-- **Auto Recovery**: Restarts gateways and runs identity recovery
-- **Verification**: Checks bot responsiveness after reset
-- **Parallel Execution**: Resets all bots simultaneously for speed
+## 🎯 Complete Solution
+This skill now provides **3 layers of protection**:
 
-## Commands
+1. **🛡️ PREVENTION** - Proactive context management to avoid overflow
+2. **📊 MONITORING** - Continuous detection with automatic alerts and triggers  
+3. **🚨 EMERGENCY RESET** - Instant team-wide recovery when overflow occurs
 
-### Emergency Reset (Immediate Use)
+## 🚀 Quick Start (Automated Protection)
 ```bash
 cd ~/clawd/nohire-team-tools/skills/context-overflow-fix/
-./context-reset.sh
+./service-manager.sh start
 ```
+This starts both monitoring and prevention services in the background.
 
-### Manual Single Bot Reset
+## 📋 Available Tools
+
+### 1. Service Manager (RECOMMENDED)
 ```bash
-# On target bot:
-rm -rf ~/.clawdbot/agents/main/sessions/*
-clawdbot gateway restart
-~/clawd/whoami.sh recover
+./service-manager.sh start     # Start full protection system
+./service-manager.sh status    # Check what's running
+./service-manager.sh stop      # Stop all services
+./service-manager.sh restart   # Restart everything
 ```
 
-## When to Use
-- **Context overflow errors** affecting team
-- **Token limit exceeded** messages
-- **Bots becoming unresponsive** due to memory issues
-- **Manager reports team-wide context issues**
+### 2. Context Monitor (Auto-Detection)
+```bash
+./context-monitor.sh monitor      # Start continuous monitoring
+./context-monitor.sh status       # Check current team usage
+./context-monitor.sh test-alert   # Test Discord alerts
+```
 
-## What It Fixes
-- ✅ Clears accumulated conversation history
-- ✅ Resets token counters to zero
-- ✅ Restores bot identity after session clear
-- ✅ Verifies mesh network connectivity
-- ✅ Gets all bots back online simultaneously
+**Monitoring Features:**
+- ✅ Checks all team bots every 5 minutes
+- ✅ Discord alerts at 75% context usage (75k tokens)
+- ✅ **Auto-triggers emergency reset** at 85% usage (85k tokens)
+- ✅ Verifies bot responsiveness after auto-fixes
 
-## Team Bots Covered
+### 3. Context Prevention (Proactive Management) 
+```bash
+./context-prevent.sh soft        # Gentle cleanup (all bots)
+./context-prevent.sh memory      # Force memory flush (all bots) 
+./context-prevent.sh rotate      # Session reset (all bots)
+./context-prevent.sh auto        # Start auto-scheduled prevention
+```
+
+**Prevention Levels:**
+- **Soft Cleanup**: Aggressive compaction, keeps conversation flow
+- **Memory Flush**: Saves context to MEMORY.md files
+- **Session Rotate**: Fresh start while preserving bot identity
+
+### 4. Emergency Reset (Last Resort)
+```bash
+./context-reset.sh              # Nuclear option - immediate team reset
+```
+
+## 🔄 Automated Schedule
+When `service-manager.sh start` is running:
+
+**Prevention Schedule:**
+- Every 4 hours: Soft cleanup (gentle maintenance)
+- Every 8 hours: Memory flush (save context to files)
+- Every 24 hours: Session rotation (fresh start)
+
+**Monitoring Schedule:**
+- Every 5 minutes: Check token usage on all bots
+- Immediate: Auto-reset if any bot exceeds 85% context
+
+## 🎯 When to Use Each Tool
+
+### Use Prevention When:
+- 📈 **Weekly maintenance** (run `soft` or `memory`)
+- 🔄 **Before important tasks** (run `rotate` for fresh start)
+- ⚡ **Performance feels sluggish** (run `soft` cleanup)
+
+### Use Monitoring When:
+- 🔍 **You want protection** (run `monitor` continuously)
+- 📊 **Check team health** (run `status` for snapshot)
+- 🚨 **Someone reports issues** (check alerts in Discord)
+
+### Use Emergency Reset When:
+- 🚨 **Multiple bots are failing** with context errors
+- ⚠️ **Monitor didn't catch it** (shouldn't happen with automation)
+- 💥 **Nuclear option needed** (clears everything instantly)
+
+## 📊 Team Bots Covered
 - dan (54.215.71.171)
 - forge (18.144.25.135) 
 - forge-jr (54.193.122.20)
@@ -48,34 +97,51 @@ clawdbot gateway restart
 - marketer (50.18.68.16)
 - franky (18.144.174.205)
 
-## Permanent Fix Integration
-This skill works with the Watchdog bot to:
-- **Monitor** context usage continuously
-- **Auto-trigger** resets at 85% context limit
-- **Alert team** via Discord when actions taken
-- **Prevent** context overflow before it happens
+## 🎉 What This Solves
+✅ **No more manual resets** - Auto-detection and auto-fix  
+✅ **No more context surprises** - Continuous monitoring with alerts  
+✅ **No more emergency scrambles** - Proactive prevention keeps bots healthy  
+✅ **Team-wide protection** - All bots managed simultaneously  
+✅ **Discord integration** - Alerts go to #bot-team channel  
+✅ **Background operation** - Set it and forget it  
 
-## Usage Example
+## 🔧 Installation & Setup
 ```bash
-# When team reports context overflow:
-./context-reset.sh
-
-# Output shows:
-# 🚨 CONTEXT OVERFLOW EMERGENCY RESET STARTING...
-# 🔄 Resetting context for dan (54.215.71.171)...
-# 🔄 Resetting context for forge (18.144.25.135)...
-# ✅ Reset complete for all bots
-# 🔍 Verifying bot responsiveness...
-# ✅ All bots responsive
+cd ~/clawd/nohire-team-tools/skills/context-overflow-fix/
+./service-manager.sh start
 ```
 
-## Troubleshooting
-- **SSH connection fails**: Check bot-factory.pem key permissions
-- **Bot still unresponsive**: May need manual EC2 restart
-- **Identity recovery fails**: Run whoami.sh recover manually on affected bot
+## 📱 Discord Alerts
+Monitor sends alerts to Discord #bot-team channel:
+- **Warning (75%)**: "⚠️ forge approaching context limit: 76000 tokens (76%)"
+- **Critical (85%)**: "🚨 Emergency context reset triggered for team bots"
+- **Resolved**: "✅ All bots should be responsive again"
 
-## Security
-- Uses SSH key authentication
-- Non-interactive SSH (safe for automation)
-- No sensitive data in command history
+## 🔍 Logs & Debugging
+```bash
+# Check service status
+./service-manager.sh status
+
+# View monitor logs
+tail -f /tmp/context-monitor.log
+
+# View prevention logs  
+tail -f /tmp/context-prevent.log
+
+# Test individual bot
+ssh -i ~/.ssh/bot-factory.pem ubuntu@54.215.71.171 "clawdbot status"
+```
+
+## 🛡️ Security
+- Uses SSH key authentication (bot-factory.pem)
+- Non-interactive SSH connections
+- Background processes with PID management
+- No sensitive data in logs or command history
 - Parallel execution with timeout protection
+
+## ⚡ Performance Impact
+- **Monitor**: Minimal (5-minute intervals, lightweight checks)
+- **Prevention**: Scheduled during low-activity periods
+- **Emergency Reset**: Fast parallel execution across team
+
+This solution completely eliminates the "full-time job" of manually managing context overflow errors.
